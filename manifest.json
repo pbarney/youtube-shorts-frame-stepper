@@ -1,0 +1,40 @@
+{
+    "manifest_version": 3,
+    "name": "YouTube Shorts Frame Stepper",
+    "version": "1.0.0",
+    "description": "Step backward or forward through YouTube Shorts one video frame at a time.",
+    "icons": {
+        "16": "icons/icon-16.png",
+        "32": "icons/icon-32.png",
+        "48": "icons/icon-48.png",
+        "96": "icons/icon-96.png",
+        "128": "icons/icon-128.png"
+    },
+
+    "minimum_chrome_version": "88",
+
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.youtube.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": false
+        }
+    ],
+
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "youtube-shorts-frame-stepper@pbarney",
+            "strict_min_version": "142.0",
+            "data_collection_permissions": {
+                "required": [
+                    "none"
+                ]
+            }
+        }
+    }
+}
