@@ -116,7 +116,7 @@ All processing occurs locally in the browser.
 
 ### The first step is not perfectly accurate
 
-extension needs a small number of presented frames to measure the frame rate. Usually, that happens so fast that you won't even notice it, but if you have trouble, just let the Short play briefly before stepping.
+The extension needs a small number of presented frames to measure the frame rate. Usually, that happens so fast that you won't even notice it, but if you have trouble, just let the Short play briefly before stepping.
 
 ### The extension uses 30 fps
 
