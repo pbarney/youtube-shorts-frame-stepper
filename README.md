@@ -61,11 +61,13 @@ For local testing in Chrome, Chromium, Brave, Edge, or another Chromium-based br
 
 ## How It Works
 
-The extension is loaded throughout `YouTube.com` so it remains available when YouTube navigates into Shorts without performing a full page load (due to the nature of its SPA approach). Keyboard events are intercepted only while the current page is a Shorts page.
+The extension is loaded throughout `YouTube.com` so it remains available when YouTube navigates into Shorts without performing a full page load, as is common with a single-page application (SPA). Keyboard events are intercepted only while the current page is a Shorts page.
 
-YouTube Shorts can use different frame rates, and YouTube doesn't provide a way to step from frame to frame. But it does allow precise tracking (e.g., step to time signature 2:34.0203). So in order to know exactly what time the next (or previous frame) is located at, we first do a calculation when the video begin playing in order to determine how many frames have passed over a specific period of video-playing time (mediaTime) by using the `requestVideoFrameCallback()` function to count the number of video frames shown during a short segment of the video. This allows a reasonable estimation of the frame rate, which we then round to the closes common frame rate.
+YouTube Shorts can use different frame rates, and YouTube doesn't provide a way to step from frame to frame. But it does allow precise tracking (e.g., step to timestamp 2:34.0203).
 
-Frame stepping via the `.` or `,` keys then changes the video's current time by the amount equivalent to one frame interval. Here are the frame rates the script looks for:
+So in order to determine the playback position of the next or previous frame, we need to estimate the Short's frame rate. When the video begins playing, the addon uses `requestVideoFrameCallback()` to compare the number of presented frames with the amount of video time (`mediaTime`) that has elapsed during a short sampling period, giving us an estimated frame rate. That estimate is then matched to the nearest common frame rate (if it falls within a reasonable tolerance).
+
+Frame stepping via the `.` or `,` keys then changes the video's current playback position by the duration of one frame interval. Here are the frame rates the script looks for:
 
 ### Standard Frame Rates:
 
