@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#c92b35">
+    <meta name="description" content="Documentation for YouTube Shorts Frame Stepper, a desktop browser extension that steps backward or forward through Shorts one frame at a time.">
+
+    <title>YouTube Shorts Frame Stepper</title>
+
+    <link rel="icon" href="assets/frame-stepper-icon.svg" type="image/svg+xml">
+
+    <style>
+        :root {
+            color-scheme: light dark;
+            --page-bg: #f5f7fa;
+            --surface: #ffffff;
+            --surface-soft: #f0f3f7;
+            --text: #1b2430;
+            --muted: #5d6875;
+            --border: #d9dfe7;
+            --accent: #c92b35;
+            --accent-hover: #a91f29;
+            --accent-soft: #fff0f1;
+            --key-bg: #ffffff;
+            --key-border: #b8c0ca;
+            --shadow: 0 18px 45px rgb(27 36 48 / 10%);
+            --content-width: 960px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --page-bg: #11151b;
+                --surface: #1a2029;
+                --surface-soft: #222a35;
+                --text: #f2f5f8;
+                --muted: #b6c0cb;
+                --border: #35404e;
+                --accent: #ff5b64;
+                --accent-hover: #ff747b;
+                --accent-soft: #351f24;
+                --key-bg: #29313c;
+                --key-border: #536071;
+                --shadow: 0 18px 45px rgb(0 0 0 / 28%);
+            }
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--page-bg);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 1rem;
+            line-height: 1.65;
+        }
+
+        a {
+            color: var(--accent);
+            text-underline-offset: 0.18em;
+        }
+
+        a:hover {
+            color: var(--accent-hover);
+        }
+
+        .skip-link {
+            position: fixed;
+            top: 0.75rem;
+            left: 0.75rem;
+            z-index: 10;
+            padding: 0.65rem 0.9rem;
+            border-radius: 0.5rem;
+            background: var(--surface);
+            color: var(--text);
+            box-shadow: var(--shadow);
+            transform: translateY(-180%);
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
+        }
+
+        .page-shell {
+            width: min(calc(100% - 2rem), var(--content-width));
+            margin-inline: auto;
+        }
+
+        .site-header {
+            padding: 4.5rem 0 2rem;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 112px minmax(0, 1fr);
+            gap: 2rem;
+            padding: clamp(1.5rem, 4vw, 3rem);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-icon {
+            display: block;
+            width: 112px;
+            height: 112px;
+        }
+
+        .eyebrow {
+            margin: 0 0 0.35rem;
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 750;
+            letter-spacing: 0.09em;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2,
+        h3 {
+            line-height: 1.2;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 6vw, 3.35rem);
+            letter-spacing: -0.035em;
+        }
+
+        .lede {
+            max-width: 45rem;
+            margin: 0.8rem 0 0;
+            color: var(--muted);
+            font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.4rem;
+        }
+
+        .button {
+            display: inline-flex;
+            min-height: 2.8rem;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.7rem;
+            background: var(--surface-soft);
+            color: var(--text);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .button-primary {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .button-primary:hover {
+            background: var(--accent-hover);
+            color: #ffffff;
+        }
+
+        main {
+            padding-bottom: 4rem;
+        }
+
+        .section {
+            margin-top: 1.25rem;
+            padding: clamp(1.35rem, 4vw, 2.25rem);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            background: var(--surface);
+        }
+
+        .section h2 {
+            margin: 0 0 1rem;
+            font-size: clamp(1.45rem, 3vw, 2rem);
+            letter-spacing: -0.02em;
+        }
+
+        .section h3 {
+            margin: 1.5rem 0 0.45rem;
+            font-size: 1.1rem;
+        }
+
+        .section p:last-child,
+        .section ul:last-child,
+        .section ol:last-child {
+            margin-bottom: 0;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .control-card {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 1rem;
+            align-items: center;
+            padding: 1.15rem;
+            border: 1px solid var(--border);
+            border-radius: 0.85rem;
+            background: var(--surface-soft);
+        }
+
+        kbd {
+            display: inline-flex;
+            min-width: 3.25rem;
+            min-height: 3.25rem;
+            align-items: center;
+            justify-content: center;
+            padding: 0.35rem 0.7rem;
+            border: 1px solid var(--key-border);
+            border-bottom-width: 4px;
+            border-radius: 0.55rem;
+            background: var(--key-bg);
+            color: var(--text);
+            font: 750 1.5rem/1 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+            box-shadow: 0 2px 0 rgb(0 0 0 / 8%);
+        }
+
+        .control-card strong {
+            display: block;
+            margin-bottom: 0.1rem;
+        }
+
+        .control-card span {
+            color: var(--muted);
+        }
+
+        .steps {
+            padding-left: 1.35rem;
+        }
+
+        .note {
+            margin-top: 1.25rem;
+            padding: 1rem 1.1rem;
+            border-left: 4px solid var(--accent);
+            border-radius: 0 0.65rem 0.65rem 0;
+            background: var(--accent-soft);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .feature {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+        }
+
+        .feature strong {
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+
+        .feature p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .plain-list {
+            padding-left: 1.25rem;
+        }
+
+        .plain-list li + li {
+            margin-top: 0.45rem;
+        }
+
+        .site-footer {
+            padding: 0 0 3rem;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .site-footer p {
+            margin: 0.3rem 0;
+        }
+
+        @media (max-width: 700px) {
+            .site-header {
+                padding-top: 1rem;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 1.15rem;
+            }
+
+            .hero-icon {
+                width: 88px;
+                height: 88px;
+            }
+
+            .controls,
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to documentation</a>
+
+    <header class="site-header page-shell">
+        <div class="hero">
+            <img
+                class="hero-icon"
+                src="assets/frame-stepper-icon.svg"
+                alt=""
+                width="112"
+                height="112"
+            >
+
+            <div>
+                <h1>YouTube Shorts Frame Stepper</h1>
+                <p class="lede">
+                    Step backward or forward through a YouTube Short one video frame at a time, using the same familiar keys as the standard YouTube player.
+                </p>
+
+                <nav class="hero-actions" aria-label="Project links">
+                    <a class="button button-primary" href="#quick-start">Quick start</a>
+                    <a class="button" href="https://github.com/pbarney/youtube-shorts-frame-stepper">View source on GitHub</a>
+                    <a class="button" href="https://github.com/pbarney/youtube-shorts-frame-stepper/issues">Report a problem</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content" class="page-shell">
+        <section id="quick-start" class="section">
+            <h2>Quick start</h2>
+
+            <ol class="steps">
+                <li>Open a Short at <code>youtube.com/shorts/…</code>.</li>
+                <li>Allow it to play briefly so the extension can detect its frame rate.</li>
+                <li>Pause and move through the video using the keys below.</li>
+            </ol>
+
+            <div class="controls" aria-label="Frame stepping controls">
+                <div class="control-card">
+                    <kbd aria-label="Comma key">,</kbd>
+                    <div>
+                        <strong>Previous frame</strong>
+                        <span>Step backward by one detected video frame.</span>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <kbd aria-label="Period key">.</kbd>
+                    <div>
+                        <strong>Next frame</strong>
+                        <span>Step forward by one detected video frame.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="note">
+                Pressing either key will pause the active Short before stepping. Do not hold Ctrl, Alt, Shift, or Command while you press the frame-step keys.
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>How it works</h2>
+
+            <div class="feature-grid">
+                <div class="feature">
+                    <strong>Automatic detection</strong>
+                    <p>The extension measures the active Short’s frame rate shortly after playback begins.</p>
+                </div>
+
+                <div class="feature">
+                    <strong>Safe fallback</strong>
+                    <p>If a reliable measurement is unavailable, stepping uses a 30 fps fallback.</p>
+                </div>
+
+                <div class="feature">
+                    <strong>Shorts only</strong>
+                    <p>On ordinary YouTube video pages, comma and period remain available to YouTube’s native controls.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Compatibility and limitations</h2>
+
+            <ul class="plain-list">
+                <li>Designed for desktop Firefox and Chromium-based browsers.</li>
+                <li>The extension requires a physical keyboard and is not offered for Firefox for Android.</li>
+                <li>Frame stepping is disabled while focus is in a text field, form control, or editable area.</li>
+                <li>YouTube can change its page structure without notice, which may occasionally require an extension update.</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2>Troubleshooting</h2>
+
+            <h3>The keys do nothing</h3>
+            <p>
+                Confirm that the address begins with <code>https://www.youtube.com/shorts/</code>, that no modifier key is held, and that the cursor is not active in a comment or other editable field.
+            </p>
+
+            <h3>Stepping does not match the frames precisely</h3>
+            <p>
+                Let the Short play for a moment before stepping. Frame-rate measurement occurs during playback, and the extension falls back to 30 fps when too few usable samples are available.
+            </p>
+
+            <h3>A regular YouTube video is affected</h3>
+            <p>
+                This should not occur. Please report the page URL and browser version through the project’s <a href="https://github.com/pbarney/youtube-shorts-frame-stepper/issues">issue tracker</a>.
+            </p>
+        </section>
+
+        <section id="privacy" class="section">
+            <h2>Privacy</h2>
+            <p>
+                YouTube Shorts Frame Stepper collects, stores, and transmits no user data. It requires no account, contains no analytics or advertising, makes no network requests of its own, and loads no remote code.
+            </p>
+        </section>
+    </main>
+
+    <footer class="site-footer page-shell">
+        <p><strong>YouTube Shorts Frame Stepper</strong></p>
+        <p>Frame-by-frame keyboard control for YouTube Shorts.</p>
+    </footer>
+</body>
+</html>
