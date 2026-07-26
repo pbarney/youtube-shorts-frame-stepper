@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "YouTube Shorts Frame Stepper",
-    "homepage_url": "https://pbarney.github.io/youtube-shorts-frame-stepper/"
+    "homepage_url": "https://pbarney.github.io/youtube-shorts-frame-stepper/",
     "version": "1.0.0",
     "description": "Step backward or forward through YouTube Shorts one video frame at a time.",
     "icons": {
